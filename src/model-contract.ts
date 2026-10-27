@@ -9,13 +9,19 @@ export const OPENAI_CODEX_CONTEXT_LIMIT_SOURCE = 'https://github.com/openai/code
 /** Sol61 provenance refresh; the immutable catalog's default/override limits are unchanged. */
 export const OPENAI_CODEX_SOL61_CONTEXT_LIMIT_SOURCE = 'https://github.com/openai/codex/blob/d63a9b8344cfe58bc78bbe319b560378fc8756ef/codex-rs/models-manager/models.json'
 
+/** Terra61 provenance; observed directly while the pi-ai catalog had not caught up. */
+export const OPENAI_CODEX_TERRA61_CONTEXT_LIMIT_SOURCE = 'https://github.com/openai/codex/blob/126a0ee92ed2c5e73cd8a8f7e37563e8527552d7/codex-rs/models-manager/models.json'
+
 /** Preserve historical provenance for existing models. */
 export function openAICodexContextLimitSource(id: string): string {
-  return id === 'gpt-6.1-sol' ? OPENAI_CODEX_SOL61_CONTEXT_LIMIT_SOURCE : OPENAI_CODEX_CONTEXT_LIMIT_SOURCE
+  if (id === 'gpt-6.1-sol') return OPENAI_CODEX_SOL61_CONTEXT_LIMIT_SOURCE
+  if (id === 'gpt-6.1-terra') return OPENAI_CODEX_TERRA61_CONTEXT_LIMIT_SOURCE
+  return OPENAI_CODEX_CONTEXT_LIMIT_SOURCE
 }
 
 const CONFIGURATION_LIMITS: Readonly<Record<string, number>> = Object.freeze({
   'gpt-6.1-sol': 872_000,
+  'gpt-6.1-terra': 872_000,
   'gpt-6-astra': 872_000,
   'gpt-6-sol': 872_000,
   'gpt-6-luna': 872_000,

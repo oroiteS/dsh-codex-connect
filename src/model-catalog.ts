@@ -13,6 +13,9 @@ export const OPENAI_CODEX_ASTRA_MODEL_ID = 'gpt-6-astra'
 // https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex
 const SOL61_CONTEXT_WINDOW = 500_000
 
+/** Official 61-family default context; the fallback and stale-bundled calibration share it. */
+const CODEX61_DEFAULT_CONTEXT_IDS: ReadonlySet<string> = new Set(['gpt-6.1-sol', 'gpt-6.1-terra'])
+
 const OPENAI_CODEX_ASTRA_MODEL: Model<'openai-codex-responses'> = {
   id: OPENAI_CODEX_ASTRA_MODEL_ID,
   name: 'GPT-6-Astra',
@@ -58,17 +61,17 @@ export function withOpenAICodexModels(
 ): Provider<'openai-codex-responses'> {
   const baseline = withOpenAICodexAstra(provider)
   const models = [...baseline.getModels()]
-  for (const [id, name] of [['gpt-6.1-sol', 'GPT-6.1-Sol'], ['gpt-6-sol', 'GPT-6-Sol'], ['gpt-6-luna', 'GPT-6-Luna']] as const) {
+  for (const [id, name] of [['gpt-6.1-sol', 'GPT-6.1-Sol'], ['gpt-6.1-terra', 'GPT-6.1-Terra'], ['gpt-6-sol', 'GPT-6-Sol'], ['gpt-6-luna', 'GPT-6-Luna']] as const) {
     const index = models.findIndex(model => model.id === id)
     // Ultra is Codex client orchestration, not a pi-ai thinking level.
     const thinkingLevelMap = { off: null, minimal: null, xhigh: 'xhigh', max: 'max' } as const
     if (index === -1) models.push({ ...OPENAI_CODEX_ASTRA_MODEL, id, name, thinkingLevelMap,
-      ...(id === 'gpt-6.1-sol' ? { contextWindow: SOL61_CONTEXT_WINDOW } : {}),
+      ...(CODEX61_DEFAULT_CONTEXT_IDS.has(id) ? { contextWindow: SOL61_CONTEXT_WINDOW } : {}),
     })
     else {
       const model = models[index]!
       models[index] = { ...model,
-        ...(source === 'bundled-static' && id === 'gpt-6.1-sol' && model.contextWindow === 272_000
+        ...(source === 'bundled-static' && CODEX61_DEFAULT_CONTEXT_IDS.has(id) && model.contextWindow === 272_000
           ? { contextWindow: SOL61_CONTEXT_WINDOW } : {}),
         thinkingLevelMap: { ...model.thinkingLevelMap, ...thinkingLevelMap },
       }
