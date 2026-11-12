@@ -16,6 +16,7 @@ import type { TaskDocument } from './adaptive-task-store.ts'
 import { currentAdaptiveTaskDispatch, inAdaptiveTaskDispatch, withAdaptiveTaskProvider } from './adaptive-task-scope.ts'
 import type { TaskDispatchScope } from './adaptive-task-scope.ts'
 import { portableTaskMessages } from './adaptive-task-context.ts'
+import { liveRoots } from './agent-tree-compat.ts'
 
 export interface TaskRuntimeOptions {
   readonly store: AdaptiveTaskStore
@@ -85,8 +86,9 @@ export class AdaptiveTaskRuntime {
     ctx.effect(() => () => this.dispose(), 'Adaptive per-task lifecycle')
   }
   private owner(sessionId: string): Agent {
-    const agent = this.ctx.get('agents')?.get(SessionId(sessionId))
-    if (agent === undefined || !this.ctx.get('agents')?.roots().includes(agent)
+    const agents = this.ctx.get('agents')
+    const agent = agents?.get(SessionId(sessionId))
+    if (agent === undefined || agents === undefined || !liveRoots(this.ctx, agents).includes(agent)
       || this.ctx.get('sessions')?.get(agent.id) !== agent.session) taskFailure('TASK_LIVE_ROOT_REQUIRED')
     return agent
   }

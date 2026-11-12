@@ -22,6 +22,7 @@ import type { TaskDelegationArtifacts } from './adaptive-task-artifacts.ts'
 import { currentAdaptiveTaskDispatch, inAdaptiveTaskDispatch, withAdaptiveTaskProvider } from './adaptive-task-scope.ts'
 import type { TaskDispatchScope } from './adaptive-task-scope.ts'
 import { taskFailure, taskIdentity } from './adaptive-task-store.ts'
+import { ownedBy } from './agent-tree-compat.ts'
 
 export const TASK_DELEGATE_TOOL = 'delegate_task'
 interface DelegateInput { goal: string; expectedOutput: string; model: string; effort: string; sourceIds: string[] }
@@ -172,7 +173,7 @@ export class AdaptiveTaskDelegation {
     const parents = (id: string) => {
       const header = this.sessions.get(id as Agent['id'])?.header
       if (header?.parentSession !== undefined) pending.push(header.parentSession)
-      for (const owner of live) if (this.agents.isOwnedBy(id as Agent['id'], owner)) pending.push(owner.id)
+      for (const owner of live) if (ownedBy(this.ctx, this.agents, id as Agent['id'], owner)) pending.push(owner.id)
     }
     parents(agent.id)
     if (pending.length === 0) return false

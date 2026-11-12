@@ -17,6 +17,7 @@ import { AdaptiveTaskDelegationLedger } from './adaptive-task-delegation-ledger.
 import type { LedgerIdentity } from './adaptive-task-delegation-ledger.ts'
 import { AdaptiveTaskDelegation } from './adaptive-task-delegation.ts'
 import { TaskDelegationHost, taskHostServices } from './adaptive-task-delegation-host.ts'
+import { liveRoots, ownedBy } from './agent-tree-compat.ts'
 import { TaskEvidenceManifest } from './adaptive-task-evidence.ts'
 import type { TaskDelegationArtifacts } from './adaptive-task-artifacts.ts'
 import { AdaptiveTaskTransitions } from './adaptive-task-transitions.ts'
@@ -53,7 +54,7 @@ export class AdaptiveTaskControlRuntime {
   }
   private root(id: string): Agent {
     const agent = this.agents.get(SessionId(id))
-    if (agent === undefined || !this.agents.roots().includes(agent)) taskFailure('TASK_LIVE_ROOT_REQUIRED')
+    if (agent === undefined || !liveRoots(this.ctx, this.agents).includes(agent)) taskFailure('TASK_LIVE_ROOT_REQUIRED')
     return agent
   }
   private identity(agent: Agent, owner: string): LedgerIdentity {
@@ -88,10 +89,10 @@ export class AdaptiveTaskControlRuntime {
   }
   /** Both durable ancestry and actual live ownership route descendants to the rejecting executor. */
   private async managed(agent: Agent): Promise<boolean> {
-    for (const root of this.agents.roots()) {
+    for (const root of liveRoots(this.ctx, this.agents)) {
       let current: Agent | undefined = agent
       const visited = new Set<string>()
-      let belongs = root === agent || this.agents.isOwnedBy(agent.id, root)
+      let belongs = root === agent || ownedBy(this.ctx, this.agents, agent.id, root)
       while (!belongs && current?.session.header.parentSession !== undefined) {
         const id = current.session.header.parentSession
         if (id === root.id) { belongs = true; break }

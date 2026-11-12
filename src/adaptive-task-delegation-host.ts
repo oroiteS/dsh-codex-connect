@@ -16,6 +16,7 @@ import type { ToolDefinition } from '@deepseek-ai/dsh-tools'
 import type { TaskChildRun } from './adaptive-task-delegation-contract.ts'
 import type { LedgerIdentity } from './adaptive-task-delegation-ledger.ts'
 import { taskFailure, taskIdentity } from './adaptive-task-store.ts'
+import { liveRoots, ownedBy } from './agent-tree-compat.ts'
 
 /** Optional host capabilities remain optional for ordinary standalone adapters. */
 export function taskHostServices(ctx: Context) {
@@ -95,14 +96,14 @@ export class TaskDelegationHost {
     const expectedKey = taskIdentity(JSON.stringify([header.id, header.createdAt, header.cwd ?? '', header.isSeeded, header.parentSession ?? '']))
     if (parent.id !== identity.sessionId || identity.sessionKey !== expectedKey
       || this.agents.get(parent.id) !== parent || this.sessions.get(parent.session.id) !== parent.session
-      || !this.agents.roots().includes(parent)
+      || !liveRoots(this.ctx, this.agents).includes(parent)
       || header.parentSession !== undefined) throw new Error('TASK_PARENT_NOT_LIVE')
   }
 
   assertNoChildren(parent: Agent): void {
     for (const candidate of this.agents.list()) {
       if (candidate === parent) continue
-      if (candidate.session.header.parentSession === parent.id || this.agents.isOwnedBy(candidate.id, parent)) throw new Error('TASK_CHILDREN_LIVE')
+      if (candidate.session.header.parentSession === parent.id || ownedBy(this.ctx, this.agents, candidate.id, parent)) throw new Error('TASK_CHILDREN_LIVE')
     }
   }
 
@@ -160,7 +161,7 @@ export class TaskDelegationHost {
     }
     const handle = await parent.ctx.agents.create(creation)
     const agent = handle.agent
-    if (!this.agents.isOwnedBy(agent.id, parent)) {
+    if (!ownedBy(this.ctx, this.agents, agent.id, parent)) {
       await handle.dispose()
       throw new Error('TASK_CHILD_OWNER_MISMATCH')
     }
@@ -205,6 +206,6 @@ export class TaskDelegationHost {
 
   private isLive(agent: Agent, sessionId: string, parent: Agent): boolean {
     return agent.id === sessionId && this.agents.get(SessionId(sessionId)) === agent
-      && this.sessions.get(agent.session.id) === agent.session && this.agents.isOwnedBy(agent.id, parent)
+      && this.sessions.get(agent.session.id) === agent.session && ownedBy(this.ctx, this.agents, agent.id, parent)
   }
 }
