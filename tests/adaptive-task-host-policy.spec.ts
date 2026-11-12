@@ -45,3 +45,8 @@ it('closes automation on exact rc.1 and rejects mixing either recovery Host', ()
     expect(() => taskHostRecoveryOnly()).toThrow('TASK_HOST_VERSION_MISMATCH')
   }
 })
+
+it('leaves exact rc.2 outside the recovery contract', () => {
+  for (const name of Object.keys(versions)) versions[name] = '0.2.2-rc.2'
+  expect(taskHostRecoveryOnly()).toBe(false)
+})

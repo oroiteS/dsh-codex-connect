@@ -4,6 +4,8 @@
 
 On exact DSH `0.2.2-alpha.3` and `0.2.2-rc.1`, saved Task records are recovery-only: inspect state, stop or take over manually. Automatic routing, resume and evidence-child creation are rejected, including internal direct entry points. Existing safe-disable/archive exits retain their owner, receipt and cleanup checks. The prior fourteen Hosts keep their behavior; Task's public activation gate remains closed everywhere.
 
+**Unreleased candidate — exact DSH `0.2.2-rc.2`:** the source tree declares rc.2 in its compatibility metadata (`compatibility.json`, peer ranges), so the plugin loads and ordinary sessions, model selection, search and image features work there. Task delegation stays closed on rc.2: attempts fail closed with `TASK_HOST_AUTOMATION_UNVERIFIED`, and no recovery exits are offered on that exact Host. `capabilities.taskAutomation` is declared `false` for every listed version — declared support never means full Task support. This candidate is not published; the table below still lists only the independently verified published pairings.
+
 [![npm version](https://img.shields.io/npm/v/dsh-codex-connect/alpha?label=npm%20alpha&color=cb3837)](https://www.npmjs.com/package/dsh-codex-connect)
 
 English | [中文](docs/README.zh.md)
