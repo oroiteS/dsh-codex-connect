@@ -51,7 +51,7 @@ it.each(['missing-case', 'duplicate-pid', 'wrong-cut', 'no-crash', 'v2-no-epoch-
 it('selects recovery only for the two exact verified contract candidates', () => {
   expect(isRecoveryHost('0.2.2-rc.1')).toBe(true)
   expect(isRecoveryHost('0.2.2-alpha.3')).toBe(true)
-  for (const version of ['0.2.2-alpha.2', '0.2.2-rc.2', '0.2.3', undefined]) {
+  for (const version of ['0.2.2-alpha.2', '0.2.2-rc.2', '0.2.2-rc.3', '0.2.3', undefined]) {
     expect(isRecoveryHost(version)).toBe(false)
     expect(() => recoveryCordisVersion(version as string)).toThrow()
   }

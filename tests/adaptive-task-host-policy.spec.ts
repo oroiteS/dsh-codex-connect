@@ -46,7 +46,7 @@ it('closes automation on exact rc.1 and rejects mixing either recovery Host', ()
   }
 })
 
-it('leaves exact rc.2 outside the recovery contract', () => {
-  for (const name of Object.keys(versions)) versions[name] = '0.2.2-rc.2'
+it.each(['0.2.2-rc.2', '0.2.2-rc.3'])('leaves exact %s outside the recovery contract', version => {
+  for (const name of Object.keys(versions)) versions[name] = version
   expect(taskHostRecoveryOnly()).toBe(false)
 })
