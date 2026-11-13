@@ -1,3 +1,4 @@
+import { taskIsOwnedBy } from './adaptive-task-host-ownership.ts'
 import { assertTaskHostAutomation } from './adaptive-task-host-policy.ts'
 /** Opt-in internal v2 execution boundary. Not constructed by the product entry point. */
 import { randomUUID } from 'node:crypto'
@@ -22,7 +23,6 @@ import type { TaskDelegationArtifacts } from './adaptive-task-artifacts.ts'
 import { currentAdaptiveTaskDispatch, inAdaptiveTaskDispatch, withAdaptiveTaskProvider } from './adaptive-task-scope.ts'
 import type { TaskDispatchScope } from './adaptive-task-scope.ts'
 import { taskFailure, taskIdentity } from './adaptive-task-store.ts'
-import { ownedBy } from './agent-tree-compat.ts'
 
 export const TASK_DELEGATE_TOOL = 'delegate_task'
 interface DelegateInput { goal: string; expectedOutput: string; model: string; effort: string; sourceIds: string[] }
@@ -68,7 +68,18 @@ export class AdaptiveTaskDelegation {
   constructor(private readonly ctx: Context, private readonly options: TaskDelegationOptions) {
     this.removeRequest = ctx.on('agent/request', async ({ agent, signal }, next) => {
       const config = await next(), root = this.roots.get(agent)
-      if (root === undefined) return config
+      if (root === undefined) {
+        // Agent dispatch is provider-neutral. A descendant must not bypass the
+        // Task fence simply by selecting an adapter without our stream wrapper.
+        const active = [...this.active.values()].find(value => value.owned?.agent === agent)
+        if (active !== undefined) {
+          assertTaskHostAutomation()
+          this.check(active)
+          if (config.provider !== 'openai-codex' || config.model !== active.run.route.model
+            || config.reasoningEffort !== active.run.route.effort) taskFailure('TASK_CHILD_ROUTE_DENIED')
+        } else if (this.roots.size > 0 && await this.descendant(agent)) taskFailure('TASK_CHILD_BINDING_MISMATCH')
+        return config
+      }
       const doc = await this.document(root)
       if (doc.mode === 'manual') return config
       assertTaskHostAutomation()
@@ -173,7 +184,7 @@ export class AdaptiveTaskDelegation {
     const parents = (id: string) => {
       const header = this.sessions.get(id as Agent['id'])?.header
       if (header?.parentSession !== undefined) pending.push(header.parentSession)
-      for (const owner of live) if (ownedBy(this.ctx, this.agents, id as Agent['id'], owner)) pending.push(owner.id)
+      for (const owner of live) if (taskIsOwnedBy(this.ctx, id as Agent['id'], owner)) pending.push(owner.id)
     }
     parents(agent.id)
     if (pending.length === 0) return false

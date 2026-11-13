@@ -222,3 +222,21 @@ it('records published Alpha 13 as the first exact 0.2.2-rc.1 support', async () 
   expect(compatibility.pluginVersions[firstAlpha13]?.verifiedDshVersions).toHaveLength(16)
   expect(install).toContain('The recommended pair is Codex Connect `0.2.0-alpha.13` / DSH `0.2.1-rc.5`')
 })
+
+it('keeps rc2 and rc3 candidate metadata separate from every published artifact and recommendation', async () => {
+  const declared = JSON.parse(await readFile(new URL('../compatibility.json', import.meta.url), 'utf8'))
+  expect(declared.dshPluginApi.versions).toHaveLength(18)
+  expect(declared.dshPluginApi.versions.at(-1)).toBe('0.2.2-rc.3')
+  const candidateIndex = compatibility.pluginVersions.findIndex((entry: { version: string }) => entry.version === '0.2.0-alpha.14')
+  expect(candidateIndex).toBe(compatibility.pluginVersions.length - 1)
+  const published = compatibility.pluginVersions.slice(0, candidateIndex)
+  expect(published.at(-1)?.version).toBe('0.2.0-alpha.13')
+  for (const entry of published) {
+    expect(entry.verifiedDshVersions).not.toContain('0.2.2-rc.2')
+    expect(entry.verifiedDshVersions).not.toContain('0.2.2-rc.3')
+  }
+  expect(compatibility.pluginVersions[candidateIndex]?.verifiedDshVersions)
+    .toEqual(declared.dshPluginApi.versions.filter((version: string) => version !== '0.2.2-rc.3'))
+  expect(compatibility.pluginVersions[candidateIndex]?.verifiedDshVersions).toHaveLength(17)
+  expect(install).toContain('The recommended pair is Codex Connect `0.2.0-alpha.13` / DSH `0.2.1-rc.5`')
+})

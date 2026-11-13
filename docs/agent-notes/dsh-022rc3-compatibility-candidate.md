@@ -38,3 +38,13 @@ Dependency-graph spot checks against the running Desktop runtime: `dsh-tools`, `
 ## Remaining limitations
 
 No packed/installed exact-`0.2.2-rc.3` temp-fixture run of `scripts/check-dsh-install.mjs`, no full Host matrix, no Node 22/24 CI, no real-account, native-GUI or Windows Desktop acceptance. The bundled `docs` candidate note states the rc.3 declaration, but `verified-compatibility.json`, `INSTALL.md`, `update-highlights.json` and the package version remain release-time work not performed here. The plugin also depends on the Desktop app's own profile recomposition (or a restart) before the previously skipped bundle is admitted again.
+
+## Upstream integration (2026-11-14)
+
+`upstream/main` advanced to `e06ed3c` (Alpha 14 verified release candidate) while this candidate was being prepared locally, and the merge reconciled the two lines as follows.
+
+- `897c5e4` (#433) publishes `0.2.2-rc.2` as a Task **recovery-only** Host and adds `src/adaptive-task-host-ownership.ts`, gated on exact `@deepseek-ai/dsh-subagent@0.2.2-rc.2`. The local `agent-tree-compat.ts` module from `af542d1`, which answered the same ownership questions while leaving rc.2 automation-closed, is superseded: it is deleted together with its spec, and the four delegation call sites use the upstream module. rc.3 is intentionally absent from `recoveryVersion()` and from `taskHostUsesSubagentOwnership()`, so exact rc.3 keeps no recovery authority and no automation.
+- Conflict resolution keeps the rc.3 declaration: `compatibility.json` and `src/compatibility-policy.ts` list eighteen versions, all twenty `@deepseek-ai/dsh-*` peer ranges end at `|| 0.2.2-rc.3`, and both checker lists match.
+- `tests/install-version-guidance.spec.ts` follows the merged Alpha 14 record: the declared list has eighteen entries ending at rc.3, while the Alpha 14 verified record keeps its seventeen through rc.2 and no published entry mentions rc.2 or rc.3.
+- `tests/adaptive-task-host-policy.spec.ts` keeps upstream's rc.2 recovery and replacement-ownership assertions and adds one rc.3 assertion: `taskHostRecoveryOnly()` and `taskHostUsesSubagentOwnership()` are both false for exact rc.3.
+- `lib/` was rebuilt from the merged source; the generated conflicts were not hand-edited.

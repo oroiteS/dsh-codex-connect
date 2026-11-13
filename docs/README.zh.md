@@ -4,7 +4,7 @@
 
 在精确的 DSH `0.2.2-alpha.3` 和 `0.2.2-rc.1` 上，旧 Task 仅保留状态查看、停止和转手动。自动路由、续跑和证据子任务创建均被拒绝，包括内部直接入口。原有停用委派／归档安全退出仍保留 owner、回执和清理校验。原十四个 Host 的行为不变，所有版本的 Task 公共激活入口继续关闭。
 
-**未发布候选 — 精确 DSH `0.2.2-rc.2` 与 `0.2.2-rc.3`：** 源码树的兼容性元数据（`compatibility.json` 与 peer range）已声明 rc.2 和 rc.3，插件可加载，普通会话、模型选择、搜索和图像功能可用。这两个 Host 上 Task 委派继续关闭：相关调用一律 fail closed 并返回 `TASK_HOST_AUTOMATION_UNVERIFIED`，该精确 Host 上不提供恢复出口。`capabilities.taskAutomation` 对所有列出版本声明为 `false` ——「声明支持」不等于「Task 全功能支持」。该候选尚未发布；下表仍只列独立核实的已发布配对。
+**未发布候选 — 精确 DSH `0.2.2-rc.3`：** 源码树的兼容性元数据（`compatibility.json` 与 peer range）已声明 rc.3，DSH 会准入该 bundle，普通会话、模型选择、搜索和图像功能可用。rc.3 上 Task 委派继续关闭：相关调用一律 fail closed 并返回 `TASK_HOST_AUTOMATION_UNVERIFIED`；rc.3 仍在已核实恢复契约之外，因此该精确 Host 上不提供恢复出口。精确 `0.2.2-rc.2` 保留为其新增的 Task 仅恢复行为。`capabilities.taskAutomation` 对所有列出版本声明为 `false` ——「声明支持」不等于「Task 全功能支持」。该候选尚未发布；下表仍只列独立核实的已发布配对。
 
 当前开发遵循[核心维护范围](maintenance-scope.md)：保留接入、兼容、诊断与恢复，冻结 Task 自动编排及未证明收益的优化。此决定不会删除已发布选项，也不会远程停用已有安装。
 
