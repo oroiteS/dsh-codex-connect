@@ -24,3 +24,10 @@ Keep experimental defaults off and preserve host-owned permissions, cancellation
 Do not read real credentials, call live models, change daily services, push, merge, publish or deploy without authorization for that action and target.
 After a denied operation, stop it and dependent work; do not change execution channels to achieve the same outcome. Continue independent, already-authorized work and report the blocker.
 Separate implemented, merged, released, enabled and accepted states in the closeout.
+
+## merge
+
+Please take the 'pull' from the upsteam, and create worktree in the path './.worktree' with the new branch. Then you need to fix the conflict under the rules:
+
+1. if it's some basic code conflicts, please fix it by the dsh-gui's document.
+2. if it's some functions conflicts, please ask the users to get the correct directions.
