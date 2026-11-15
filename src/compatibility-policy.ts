@@ -10,8 +10,8 @@ export const PI_AI_PACKAGE = '@earendil-works/pi-ai'
 /**
  * Host-capability declaration mirrored by compatibility.json. `taskAutomation:
  * false` says delegated Task automation is closed on every declared version:
- * `0.2.2-alpha.3`/`0.2.2-rc.1` keep their exercised recovery-only exits, every
- * other declared version fails closed, and no declared version offers automatic
+ * `0.2.2-alpha.3`/`0.2.2-rc.1`/`0.2.2-rc.2` retain recovery-only exits;
+ * rc.3 is outside that recovery contract. No declared version offers automatic
  * routing, resume or delegation. Public Task activation stays closed everywhere.
  */
 export const HOST_CAPABILITIES = { taskAutomation: false } as const
