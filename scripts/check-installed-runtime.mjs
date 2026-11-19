@@ -80,7 +80,7 @@ export async function checkInstalledRuntime(profilePackagePath, hostPackagePath 
     const listed = await ctx.llm.listModels(PROVIDER_ID)
     const models = await Promise.all(listed.map(model => ctx.llm.resolveModelInfo(PROVIDER_ID, model.id)))
     const projection = validateRuntimeProjection(providers, models)
-    for (const id of ['gpt-6-sol', 'gpt-6-luna']) {
+    for (const id of ['gpt-6-sol', 'gpt-6-luna', 'gpt-6.2-sol', 'gpt-6.2-astra']) {
       const model = models.find(model => model.id === id)
       if (model?.reasoning?.efforts.map(effort => effort.id).join(',') !== 'low,medium,high,xhigh,max') {
         throw new Error(`runtime is missing calibrated GPT-6 compatibility for ${id}`)

@@ -52,7 +52,7 @@ it('selects recovery only for the three exact recovery contract candidates', () 
   expect(isRecoveryHost('0.2.2-rc.1')).toBe(true)
   expect(isRecoveryHost('0.2.2-alpha.3')).toBe(true)
   expect(isRecoveryHost('0.2.2-rc.2')).toBe(true)
-  for (const version of ['0.2.2-alpha.2', '0.2.2-rc.3', '0.2.3', undefined]) {
+  for (const version of ['0.2.2-alpha.2', '0.2.2-rc.3', '0.2.2-rc.4', '0.2.2-rc.5', '0.2.3', undefined]) {
     expect(isRecoveryHost(version)).toBe(false)
     expect(() => recoveryCordisVersion(version as string)).toThrow()
   }

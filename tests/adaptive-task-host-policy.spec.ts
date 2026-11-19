@@ -61,7 +61,7 @@ it('requires exact subagent metadata for replacement ownership, never just the c
   for (const name of Object.keys(versions)) versions[name] = '0.2.2-rc.2'
   versions['dsh-subagent'] = '0.2.2-rc.2'
   expect(taskHostUsesSubagentOwnership()).toBe(true)
-  for (const version of [undefined, '0.2.2-rc.1', '0.2.2-rc.3']) {
+  for (const version of [undefined, '0.2.2-rc.1', '0.2.2-rc.3', '0.2.2-rc.4', '0.2.2-rc.5']) {
     versions['dsh-subagent'] = version
     expect(() => taskHostUsesSubagentOwnership()).toThrow('TASK_HOST_VERSION_MISMATCH')
   }
@@ -78,8 +78,8 @@ it('rejects a foreign subagent manifest and keeps legacy Host ownership unchange
   expect(taskHostUsesSubagentOwnership()).toBe(false)
 })
 
-it('leaves exact rc.3 outside the recovery contract and replacement ownership', () => {
-  for (const name of Object.keys(versions)) versions[name] = '0.2.2-rc.3'
+it.each(['0.2.2-rc.3', '0.2.2-rc.4', '0.2.2-rc.5'])('leaves exact %s outside the recovery contract and replacement ownership', version => {
+  for (const name of Object.keys(versions)) versions[name] = version
   expect(taskHostRecoveryOnly()).toBe(false)
   expect(taskHostUsesSubagentOwnership()).toBe(false)
 })

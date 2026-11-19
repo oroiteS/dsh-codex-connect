@@ -4,6 +4,7 @@
 
 **历史 Alpha 13：** [`0.2.0-alpha.13`](https://github.com/franksong2702/dsh-codex-connect/releases/tag/v0.2.0-alpha.13) 仅新增精确的 stock DSH `0.2.2-rc.1`，保留原十五个 Host 及下述 Task 仅恢复限制。npm 版本／alpha、匹配的 Git tag／prerelease 和归档完整性均已独立核实。`latest` 保持 Alpha 10。参见[发布与验证记录](release-notes/0.2.0-alpha.13.md)。这不要求升级 DSH；隔离合成检查不代表真实账户／模型、原生 GUI 或 Windows Desktop 验收。
 
+**未发布的源码候选 — 精确 DSH `0.2.2-rc.4` 与 `0.2.2-rc.5`：** 源码树在 `compatibility.json` 及全部二十个 DSH peer range 中声明了这两个精确 Host，因此当前 `0.2.2-rc.5` 运行时上的 Desktop profile 会重新接纳该 bundle。普通会话、模型选择、搜索与图像功能预期可用，`gpt-6.2-sol`／`gpt-6.2-astra` 可通过手动模型目录选择。与 rc.3 相同，这两个精确 Host 上 Task 委派保持关闭：相关调用以 `TASK_HOST_AUTOMATION_UNVERIFIED` fail closed，不提供恢复出口；`capabilities.taskAutomation` 对所有声明版本仍为 `false`。该候选尚未发布，不改写已发布 Alpha 15 的建议，也不要求升级 DSH。
 已发布的 Alpha 15 在精确 DSH `0.2.2-alpha.3`、`0.2.2-rc.1`、`0.2.2-rc.2` 和 `0.2.2-rc.3` 上仅支持旧 Task 恢复；自动路由、续跑和证据子任务创建仍被拒绝。原有停用委派／归档安全退出仍保留 owner、回执和清理校验。
 
 **本地定制：**此 worktree 在精确 DSH `0.2.2-rc.3` 上禁用旧 Task 恢复，并移除输入区 Task 入口。已发布的 Alpha 15 安装包及其历史验证记录不变；这些验证不能证明此定制构建已获验证。在 rc.3 上，如果活动中的遗留 v2 账本无法核验归属，可能阻止无关的普通模型请求或辅助请求。该风险依据的是已发布 Alpha 15 修复前的上游合成观察，并非对本地定制构建的实测；已发布的安装包包含该修复。rc.2 的仅恢复策略保留。`capabilities.taskAutomation` 对所有列出版本声明为 `false`；声明支持不等于支持 Task 全功能。
@@ -194,3 +195,5 @@ Alpha 5 能力校准：[来源对照](agent-notes/gpt61-capability-calibration.m
 已发布的 #338 基础默认值后续修复：按官方 Work/Codex 产品默认策略，将 Sol61 缺失条目和已知旧内置静态元数据的基础默认值校准为 **500,000 token**。显式提供方元数据与用户覆盖值仍优先；其他模型、输出上限和 872,000 本地配置上限不变。[范围与证据](agent-notes/sol61-context-default.md) 区分校准默认值与真实路由容量。
 
 Alpha 11 已发布：手动模型目录与配置选择器新增 `gpt-6.1-terra`，保留文字/图片输入和既有 Responses 工具。官方 Codex 回退默认 500,000 tokens，本地可选上限 872,000、输出上限 128,000；上游原生元数据优先，但与 Sol61 一样仍套用 effort 遮罩。提供 Low、Medium、High、Xhigh、Max；Default 不发送 effort。锁定的 OAuth 目录未列出 API 的 `none`，Ultra 客户端编排不受支持。本轮不新增桌面 Computer Use 执行器、不扩大 Ultrafast 范围。[来源、范围及合成验证](agent-notes/gpt61-terra-support.md)；真实账户可用性尚未验证。
+
+未发布的源码候选：手动模型目录与配置选择器新增 `gpt-6.2-sol` 和 `gpt-6.2-astra`，保留文字/图片输入和既有 Responses 工具。两者的官方 Codex 回退默认值分别为 500,000 和 272,000 tokens，本地可选上限均为 872,000、输出上限为 128,000；上游原生元数据优先，同时仍套用既有 effort 遮罩。提供 Low、Medium、High、Xhigh、Max；Default 不发送 effort。Ultra 客户端编排不受支持，既有 Ultrafast 范围不变。[来源、范围及合成验证](agent-notes/gpt62-models-support.md)；真实账户可用性尚未验证。
