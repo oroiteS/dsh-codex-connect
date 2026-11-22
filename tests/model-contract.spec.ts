@@ -27,10 +27,6 @@ describe('model-specific configuration ceilings', () => {
     ['gpt-5.6-sol', 272_000, 872_000],
     ['gpt-5.6-terra', 272_000, 872_000],
     ['gpt-5.6-luna', 272_000, 872_000],
-    ['gpt-5.4', 272_000, 1_000_000],
-    ['gpt-5.5', 272_000, 272_000],
-    ['gpt-5.4-mini', 272_000, 272_000],
-    ['gpt-5.3-codex-spark', 128_000, 128_000],
   ])('exposes %s defaults and enforces the ceiling in both browser and adapter validation', (id, contextWindow, maximum) => {
     const model = openAICodexModelCatalog().find(entry => entry.id === id)!
     expect(model).toMatchObject({ contextWindow, maxContextWindow: maximum })
@@ -69,7 +65,7 @@ describe('model-specific configuration ceilings', () => {
     for (const id of ['new-model', 'toString', 'gpt-5.6-sol']) {
       expect(openAICodexContextLimit(id, 1_100_000)).toEqual({ maxContextWindow: 1_100_000, contextLimitSource: 'catalog-default' })
     }
-    expect(openAICodexContextLimit('gpt-5.3-codex-spark', 128_000).contextLimitSource).toBe('catalog-default')
+    expect(openAICodexContextLimit('new-model', 128_000).contextLimitSource).toBe('catalog-default')
   })
 
   it('rejects provider overrides above the ceiling even without Host settings', () => {

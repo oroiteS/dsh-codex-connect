@@ -9,6 +9,13 @@ import { OPENAI_CODEX_PROVIDER } from './store.ts'
 /** Official Codex id supplied when the installed pi-ai catalog predates Astra. */
 export const OPENAI_CODEX_ASTRA_MODEL_ID = 'gpt-6-astra'
 
+// The bundled pi-ai catalog still advertises these unavailable Codex models.
+const RETIRED_MODEL_IDS = new Set(['gpt-5.3-codex-spark', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.5'])
+
+export function isRetiredCodexCatalogModel(id: string): boolean {
+  return RETIRED_MODEL_IDS.has(id)
+}
+
 // Work/Codex product default; the older embedded catalog remains the override-ceiling source.
 // https://help.openai.com/en/articles/20001275-chatgpt-work-and-codex
 const SOL61_CONTEXT_WINDOW = 500_000
@@ -63,7 +70,7 @@ export function withOpenAICodexModels(
   source: 'provider' | 'bundled-static' = 'provider',
 ): Provider<'openai-codex-responses'> {
   const baseline = withOpenAICodexAstra(provider)
-  const models = [...baseline.getModels()]
+  const models = baseline.getModels().filter(model => !isRetiredCodexCatalogModel(model.id))
   for (const [id, name] of [['gpt-6.2-sol', 'GPT-6.2-Sol'], ['gpt-6.2-astra', 'GPT-6.2-Astra'], ['gpt-6.1-sol', 'GPT-6.1-Sol'], ['gpt-6-sol', 'GPT-6-Sol'], ['gpt-6-luna', 'GPT-6-Luna'], ['gpt-6.1-terra', 'GPT-6.1 Terra']] as const) {
     const index = models.findIndex(model => model.id === id)
     // Ultra is Codex client orchestration, not a pi-ai thinking level.

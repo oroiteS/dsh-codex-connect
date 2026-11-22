@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises'
 import { createServer } from 'node:http'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { Context } from '@deepseek-ai/cordis'
 import LocalAttachmentStore from '@deepseek-ai/dsh-attachment-local'
 import LocalFileSystem from '@deepseek-ai/dsh-fs-local'
@@ -110,7 +110,9 @@ describe('view_image', () => {
     const context = await setup()
     await writeFile(join(workspace, 'pixel.png'), PNG_1X1)
 
-    const result = await view(context, 'pixel.png', 'gpt-5.3-codex-spark')
+    const model = 'text-only-fixture'
+    vi.spyOn(context.llm, 'resolveModelInfo').mockResolvedValueOnce({ provider: OpenAICodex.OPENAI_CODEX_PROVIDER, id: model, name: model, inputModalities: ['text'] })
+    const result = await view(context, 'pixel.png', model)
 
     expect(result.isError).toBe(true)
     expect(result.content.find(block => block.type === 'text')?.text).toContain('does not declare image input')

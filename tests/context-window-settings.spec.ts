@@ -124,9 +124,16 @@ describe('context windows through the real Host settings and LLM registry', () =
     expect((await runtime.llm.resolveModelInfo(provider, other)).context?.contextWindow).toBe(340_000)
   })
 
+  it('keeps active models usable with a saved selection and budget for a retired model', async () => {
+    const retired = 'gpt-5.4'
+    const runtime = await boot({ models: [retired, model], contextWindowOverrides: { [retired]: 900_000, [model]: 350_000 } })
+    expect((await runtime.llm.listModels(provider)).map(entry => entry.id)).toEqual([model])
+    expect((await runtime.llm.resolveModelInfo(provider, model)).context?.contextWindow).toBe(350_000)
+  })
+
   it('rejects invalid or unknown-model writes before persistence and retains the last effective budget', async () => {
     const runtime = await boot({ contextWindowOverrides: { [model]: 300_000 } })
-    for (const overrides of [{ [model]: 0 }, { [model]: 1.5 }, { [model]: 872_001 }, { 'gpt-5.5': 272_001 }, { 'gpt-5.3-codex-spark': 128_001 }, { 'openai-codex/gpt-5.6-sol': 350_000 }]) {
+    for (const overrides of [{ [model]: 0 }, { [model]: 1.5 }, { [model]: 872_001 }, { 'openai-codex/gpt-5.6-sol': 350_000 }]) {
       await expect(runtime.settings.update(ns, { contextWindowOverrides: overrides })).rejects.toThrow()
       expect((await runtime.llm.resolveModelInfo(provider, model)).context?.contextWindow).toBe(300_000)
       expect(runtime.settings.describe().find(entry => entry.ns === ns)?.value)

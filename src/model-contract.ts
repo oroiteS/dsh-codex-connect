@@ -33,9 +33,6 @@ const CONFIGURATION_LIMITS: Readonly<Record<string, number>> = Object.freeze({
   'gpt-5.6-sol': 872_000,
   'gpt-5.6-terra': 872_000,
   'gpt-5.6-luna': 872_000,
-  'gpt-5.4': 1_000_000,
-  'gpt-5.5': 272_000,
-  'gpt-5.4-mini': 272_000,
 })
 
 /** Keep unlisted or newer provider defaults usable without inventing a larger limit. */

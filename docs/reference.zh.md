@@ -36,7 +36,7 @@ Ultrafast 消耗更多额度。官方文档区分可用的 Pro500、Enterprise/E
 - **Fast Mode** 只为当前对话请求优先服务（`service_tier: 'priority'`）。默认关闭，不会更换模型或降低推理强度。新对话和新子代理的 Fast Mode 默认值也不改变推理强度。实际速度和额度消耗取决于服务端，不保证固定提速倍数。
 - Profile 中的「新对话默认使用 Fast Mode」和「新子代理对话默认使用 Fast Mode」互相独立，初始均关闭。只在新会话启动时应用；修改设置不会倒改已有会话，也不会覆盖 Composer 中的手动选择。单个对话的 Fast Mode 状态仍保存在进程内，因此插件重启后恢复该对话会回到标准速度；之后新建的会话仍按已保存的默认值启动。
 - **源码后续变更，尚未发布：** `newSessionSpeedMode` 与 `newSubagentSpeedMode` 可独立设置为 `standard`、`fast` 或 `ultrafast`。显式值优先于对应旧 Fast 布尔值；省略或 `null` 沿用保留的旧偏好。更多设置提供两个选择器，选定显式值后禁用对应旧开关。只在新会话启动时捕获一次，不改变恢复会话、已有会话或之后的手动选择。Ultrafast 须先登录再创建会话，且仅适用于精确受支持的 Codex 模型；其他初始路由使用 Standard，不据此认定付费权益。切换模型或账户（包括切走再切回）会使旧启动意图失效；异步读取账户期间的手动选择也优先。首个 Host 请求路由或 Composer 已有的速度读取负责绑定偏好，不增加提供方请求。受支持模型缺少登录时明确报错，重试不会自动降为 Standard，直到手动或生命周期变更解除。参见[启动默认值说明](agent-notes/new-session-speed-defaults.md)。
-- **额度条**在已登录且标签页可见时通常每 60 秒刷新一次（隐藏时暂停，失败后延长重试间隔），只显示服务端实际返回的 `5h` 和 `7d` 窗口，并显示精确剩余百分比与重置时间。`gpt-5.3-codex-spark` 使用独立的 Spark 额度桶。Codex Connect 不会虚构缺失窗口，也不会根据套餐名称隐藏已返回窗口。
+- **额度条**在已登录且标签页可见时通常每 60 秒刷新一次（隐藏时暂停，失败后延长重试间隔），只显示服务端实际返回的 `5h` 和 `7d` 窗口，并显示精确剩余百分比与重置时间。Codex Connect 不会虚构缺失窗口，也不会根据套餐名称隐藏已返回窗口。
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/franksong2702/dsh-codex-connect/main/docs/assets/composer-capabilities.jpg" alt="DeepSeek Harness Composer 中的 Fast Mode 与额度控件" width="820">

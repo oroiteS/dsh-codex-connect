@@ -18,7 +18,20 @@ import type { OpenAICodexCredentialStore } from '../src/store.ts'
 import { OPENAI_CODEX_PROVIDER } from '../src/store.ts'
 import { Config } from '../src/index.ts'
 
+const retiredModels = ['gpt-5.3-codex-spark', 'gpt-5.4', 'gpt-5.4-mini', 'gpt-5.5']
+
 describe('OpenAI Codex rc.2 adapter profile', () => {
+  it('excludes retired models from the settings catalog, discovery and explicit selection', async () => {
+    const adapter = createOpenAICodexAdapter({} as OpenAICodexCredentialStore, () => undefined)
+    const listed = await adapter.listModels(OPENAI_CODEX_PROVIDER)
+    const catalog = openAICodexModelCatalog()
+    for (const id of retiredModels) {
+      expect(catalog.map(model => model.id)).not.toContain(id)
+      expect(listed.map(model => model.id)).not.toContain(id)
+      await expect(adapter.prepareCall(OPENAI_CODEX_PROVIDER, id)).rejects.toMatchObject({ code: 'MODEL_RETIRED' })
+    }
+  })
+
   it.each(['gpt-6.1-sol', 'gpt-6-sol', 'gpt-6-luna'])('adds missing %s without duplicating or overwriting native metadata', id => {
     const provider = openaiCodexProvider()
     const baseline = provider.getModels().filter(model => model.id !== id)
@@ -34,7 +47,7 @@ describe('OpenAI Codex rc.2 adapter profile', () => {
     expect(result.filter(model => model.id === id)).toEqual([{ ...native,
       thinkingLevelMap: { off: null, minimal: null, xhigh: 'xhigh', max: 'max' } }])
     expect(native.thinkingLevelMap).toEqual({ minimal: 'minimal' })
-    for (const old of baseline.filter(model => model.id !== OPENAI_CODEX_ASTRA_MODEL_ID && !['gpt-6.1-sol', 'gpt-6-sol', 'gpt-6-luna'].includes(model.id))) {
+    for (const old of baseline.filter(model => ![OPENAI_CODEX_ASTRA_MODEL_ID, 'gpt-6.1-sol', 'gpt-6-sol', 'gpt-6-luna', ...retiredModels].includes(model.id))) {
       expect(result.find(model => model.id === old.id)).toBe(old)
     }
   })

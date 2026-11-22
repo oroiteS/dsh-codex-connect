@@ -21,7 +21,7 @@ import { OPENAI_CODEX_PROVIDER } from './store.ts'
 import type { FastModeRegistry } from './fast-mode.ts'
 import type { OpenAICodexModelCatalogEntry } from './model-contract.ts'
 import { isValidOpenAICodexContextBudget, openAICodexContextLimit } from './model-contract.ts'
-import { OPENAI_CODEX_TRANSPORT, withOpenAICodexModels } from './model-catalog.ts'
+import { isRetiredCodexCatalogModel, OPENAI_CODEX_TRANSPORT, withOpenAICodexModels } from './model-catalog.ts'
 import type { OpenAICodexProxyManager } from './provider-proxy.ts'
 import type { OpenAICodexBackendRequests } from './backend-request.ts'
 import { streamWithNativeCompactionScope, withOpenAICodexNativeCompaction } from './native-compaction.ts'
@@ -92,9 +92,10 @@ export function withOpenAICodexFastMode(
 }
 
 /** Reject persisted legacy selections before resolving credentials or provider state. */
-function rejectRetiredReserve(provider: string, model: string): void {
-  if (provider === OPENAI_CODEX_PROVIDER && model === 'gpt-reserve') {
-    throw new LlmError('Luna Reserve has been removed. Select an ordinary model explicitly to continue this conversation. No model request was sent.', 'MODEL_RETIRED')
+function rejectRetiredModel(provider: string, model: string): void {
+  if (provider === OPENAI_CODEX_PROVIDER && (model === 'gpt-reserve' || isRetiredCodexCatalogModel(model))) {
+    const name = model === 'gpt-reserve' ? 'Luna Reserve' : model
+    throw new LlmError(`${name} has been removed. Select an ordinary model explicitly to continue this conversation. No model request was sent.`, 'MODEL_RETIRED')
   }
 }
 
@@ -198,6 +199,8 @@ export function assertOpenAICodexContextWindowOverrides(
   const models = new Map(catalog.map(model => [model.id, model]))
   for (const [id, budget] of Object.entries(overrides ?? {})) {
     const model = models.get(id)
+    // A saved override for a removed model is inert; it must not block plugin startup.
+    if (model === undefined && isRetiredCodexCatalogModel(id)) continue
     if (model === undefined) throw new TypeError(`OpenAI Codex contextWindowOverrides contains unknown model id "${id}"`)
     const { maxContextWindow } = openAICodexContextLimit(id, model.contextWindow)
     if (budget !== null && !isValidOpenAICodexContextBudget(budget, maxContextWindow)) {
@@ -274,7 +277,7 @@ export function createOpenAICodexAdapter(
       stream: (options: GenerateOptions) => AsyncIterable<StreamChunk>,
       options: GenerateOptions,
     ): AsyncIterable<StreamChunk> {
-      rejectRetiredReserve(options.provider, options.model)
+      rejectRetiredModel(options.provider, options.model)
       const dispatch = (request: GenerateOptions) => {
         const projected = imageEditingEnabled?.() === true ? withOpenAICodexImageSelectionHandles(request) : request
         const observed = (nextOptions: GenerateOptions) => streamWithCodexRequestDiagnostics(next => {
@@ -294,12 +297,12 @@ export function createOpenAICodexAdapter(
     }
 
     override async resolveModel(providerId: string, model: string, signal?: AbortSignal) {
-      rejectRetiredReserve(providerId, model)
+      rejectRetiredModel(providerId, model)
       return super.resolveModel(providerId, model, signal)
     }
 
     override async prepareCall(providerId: string, model: string, signal?: AbortSignal): Promise<PreparedAdapterCall> {
-      rejectRetiredReserve(providerId, model)
+      rejectRetiredModel(providerId, model)
       const prepared = await super.prepareCall(providerId, model, signal)
       return {
         model: prepared.model,
